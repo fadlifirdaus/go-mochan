@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Clipboard Image to PNG</title>
+    </head>
+    <body>
+        <h1>Clipboard Image to PNG</h1>
+        <button id="convert">Convert and Download</button>
+        <script>
+            document
+                .getElementById("convert")
+                .addEventListener("click", function () {
+                    navigator.clipboard.read().then(function (items) {
+                        for (var i = 0; i < items.length; i++) {
+                            if (items[i].types.indexOf("image/png") > -1) {
+                                items[i]
+                                    .getType("image/png")
+                                    .then(function (blob) {
+                                        var link = document.createElement("a");
+                                        link.href = URL.createObjectURL(blob);
+                                        link.download = "converted.png";
+                                        link.click();
+                                    });
+                            }
+                        }
+                    });
+                });
+        </script>
+    </body>
+</html>
