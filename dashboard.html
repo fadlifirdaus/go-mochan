@@ -137,41 +137,14 @@
             id="network_chart"
         ></div>
         <!-- test -->
-        <div class="text-white" id="data"></div>
-
-        <script>
-        async function getMonitoringData(name) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'http://localhost:8080/mon?name=' + name);
-            xhr.send();
-
-            return new Promise(function(resolve, reject) {
-                xhr.onload = function () {
-                    if (xhr.status === 200) {
-                        var data = JSON.parse(xhr.responseText);
-                        console.log(data);
-                        resolve(data);
-                    } else {
-                        console.log('Request failed.  Returned status of ' + xhr.status);
-                        reject(xhr.status);
-                    }
-                };
-            });
-        }
-
-        async function updateData() {
-            var data = await getMonitoringData('https://www.example.com');
-            var div = document.getElementById('data');
-            div.innerHTML = JSON.stringify(data);
-        }
-
-        // Example usage:
-        setInterval(function() {
-            updateData();
-        }, 5000);
-        </script>
+        <div class="container mx-auto px-4">
+            <div class="relative overflow-x-auto shadow-lg mt-4 bg-gray-900">
+                <div class="grid grid-cols-4 gap-4" id="example_chart"></div>
+            </div>
+        </div>
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="testasync.js"></script>
         <script src="monitoring.js"></script>
         <script src="generateChart.js"></script>
         <script src="balance.js"></script>

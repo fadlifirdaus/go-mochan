@@ -38,7 +38,7 @@ func main() {
 		}
 		defer db.Close()
 
-		rows, err := db.Query(fmt.Sprintf("SELECT * FROM monitoring WHERE service_name = '%s' ORDER BY id DESC LIMIT 10", name))
+		rows, err := db.Query(fmt.Sprintf("SELECT * FROM (SELECT * FROM monitoring WHERE service_name = '%s' ORDER BY id DESC LIMIT 50) AS t ORDER BY t.id ASC", name))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -57,7 +57,7 @@ func main() {
 			}
 			monitoringData = MonitoringData{
 				Status: status,
-				Time:   createdAt.Format("15:04:05"),
+				Time:   createdAt.Format("15:04"),
 			}
 			monitorings.Name = serviceName
 			monitorings.Data = append(monitorings.Data, monitoringData)

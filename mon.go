@@ -9,7 +9,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func test_mon() {
+func test_main() {
 	db, err := sql.Open("mysql", "root:W7tK#AzSD&h@@tcp(127.0.0.1:3306)/test")
 	if err != nil {
 		panic(err.Error())
@@ -24,6 +24,7 @@ func test_mon() {
 
 func test_checkStatus(db *sql.DB) {
 	url := "https://www.example.com"
+	name := "example"
 	status := 0
 
 	_, err := http.Get(url)
@@ -37,10 +38,10 @@ func test_checkStatus(db *sql.DB) {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(url, status)
+	_, err = stmt.Exec(name, status)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	fmt.Printf("Service %s is %s\n", url, map[int]string{0: "down", 1: "up"}[status])
+	fmt.Printf("Service %s is %s\n", name, map[int]string{0: "down", 1: "up"}[status])
 }
