@@ -93,7 +93,7 @@
         </nav>
         <!-- table -->
         <div class="container mx-auto px-4">
-            <div class="relative overflow-x-auto shadow-lg rounded-lg mt-2">
+            <div class="relative overflow-x-auto shadow-lg rounded-lg mt-4">
                 <table
                     class="w-full text-xs text-left rtl:text-right text-gray-500 dark:text-gray-300"
                 >
@@ -126,15 +126,51 @@
             <!-- ... -->
         </div>
         <!-- chart 1 -->
-        <div
-            class="flex bg-gray-900 pb-2 justify-center mt-2"
-            id="tsel_chart"
-        ></div>
+        <div class="container mx-auto px-4">
+            <div class="relative overflow-x-auto shadow-lg mt-4 bg-gray-900">
+                <div class="grid grid-cols-4 gap-4" id="tsel_chart"></div>
+            </div>
+        </div>
         <!-- chart 2 -->
         <div
             class="flex bg-gray-900 pb-2 justify-center"
             id="network_chart"
         ></div>
+        <!-- test -->
+        <div class="text-white" id="data"></div>
+
+        <script>
+        async function getMonitoringData(name) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'http://localhost:8080/mon?name=' + name);
+            xhr.send();
+
+            return new Promise(function(resolve, reject) {
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        var data = JSON.parse(xhr.responseText);
+                        console.log(data);
+                        resolve(data);
+                    } else {
+                        console.log('Request failed.  Returned status of ' + xhr.status);
+                        reject(xhr.status);
+                    }
+                };
+            });
+        }
+
+        async function updateData() {
+            var data = await getMonitoringData('https://www.example.com');
+            var div = document.getElementById('data');
+            div.innerHTML = JSON.stringify(data);
+        }
+
+        // Example usage:
+        setInterval(function() {
+            updateData();
+        }, 5000);
+        </script>
+
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="monitoring.js"></script>
         <script src="generateChart.js"></script>

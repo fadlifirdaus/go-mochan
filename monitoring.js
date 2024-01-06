@@ -1,3 +1,19 @@
+// function getMonitoringData(name) {
+//     var xhr = new XMLHttpRequest();
+//     xhr.open('GET', 'http://localhost:8080/mon?name=' + name);
+//     xhr.onload = function () {
+//         if (xhr.status === 200) {
+//             var data = JSON.parse(xhr.responseText);
+//             console.log(data);
+//         } else {
+//             console.log('Request failed.  Returned status of ' + xhr.status);
+//         }
+//     };
+//     xhr.send();
+// }
+// // Example usage:
+// getMonitoringData('https://www.example.com');
+
 function generateData(s = "random") {
     let result = [];
     let date = new Date();
@@ -75,12 +91,12 @@ let options = {
             },
         },
     },
+    animation: false,
     scales: {
         y: {
             ticks: {
-                display: false,
+                display: true,
                 color: "white",
-                padding: 0,
                 callback: function (value, index, values) {
                     if (value == 1) {
                         return "U";

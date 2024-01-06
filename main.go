@@ -1,39 +1,70 @@
 package main
 
 import (
-    "fmt"
-    "image"
-    "image/png"
-    "os"
-	"bytes"
+	"database/sql"
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+	"time"
 
-    "golang.design/x/clipboard"
+	_ "github.com/go-sql-driver/mysql"
 )
 
+type MonitoringData struct {
+	Status string `json:"status"`
+	Time   string `json:"time"`
+}
+
+type Monitoring struct {
+	Name string           `json:"name"`
+	Data []MonitoringData `json:"data"`
+}
+
 func main() {
-    err := clipboard.Init()
-    if err != nil {
-        panic(err)
-    }
+	http.HandleFunc("/mon", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		name := r.URL.Query().Get("name")
+		if name == "" {
+			http.Error(w, "Missing query parameter 'name'", http.StatusBadRequest)
+			return
+		}
 
-    data:= clipboard.Read(clipboard.FmtImage)
+		db, err := sql.Open("mysql", "root:W7tK#AzSD&h@@tcp(127.0.0.1:3306)/test?parseTime=true")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer db.Close()
 
-    img, _, err := image.Decode(bytes.NewReader(data))
+		rows, err := db.Query(fmt.Sprintf("SELECT * FROM monitoring WHERE service_name = '%s' ORDER BY id DESC LIMIT 10", name))
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer rows.Close()
 
-    if err != nil {
-        panic(err)
-    }
+		var monitorings Monitoring
+		var monitoringData MonitoringData
+		for rows.Next() {
+			var id int
+			var serviceName string
+			var status string
+			var createdAt time.Time
+			err := rows.Scan(&id, &serviceName, &status, &createdAt)
+			if err != nil {
+				log.Fatal(err)
+			}
+			monitoringData = MonitoringData{
+				Status: status,
+				Time:   createdAt.Format("15:04:05"),
+			}
+			monitorings.Name = serviceName
+			monitorings.Data = append(monitorings.Data, monitoringData)
+		}
 
-    f, err := os.Create("clipboard.png")
-    if err != nil {
-        panic(err)
-    }
-    defer f.Close()
+		json.NewEncoder(w).Encode(monitorings)
+	})
 
-    err = png.Encode(f, img)
-    if err != nil {
-        panic(err)
-    }
-
-    fmt.Println("Image data from clipboard has been saved to clipboard.png")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
