@@ -17,8 +17,9 @@ type MonitoringData struct {
 }
 
 type Monitoring struct {
-	Name string           `json:"name"`
-	Data []MonitoringData `json:"data"`
+	Name      string           `json:"name"`
+	Data      []MonitoringData `json:"data"`
+	UpdatedAt string           `json:"updated_at"`
 }
 
 func main() {
@@ -61,6 +62,7 @@ func main() {
 			}
 			monitorings.Name = serviceName
 			monitorings.Data = append(monitorings.Data, monitoringData)
+			monitorings.UpdatedAt = createdAt.Format("2006-01-02 15:04:05")
 		}
 
 		json.NewEncoder(w).Encode(monitorings)

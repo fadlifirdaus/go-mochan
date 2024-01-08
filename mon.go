@@ -26,8 +26,12 @@ func test_checkStatus(db *sql.DB) {
 	url := "https://www.example.com"
 	name := "example"
 	status := 0
+	// add timeout 5 seconds
+	client := http.Client{
+		Timeout: 5 * time.Second,
+	}
 
-	_, err := http.Get(url)
+	_, err := client.Get(url)
 	if err == nil {
 		status = 1
 	}

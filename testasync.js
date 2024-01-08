@@ -22,6 +22,7 @@ async function getMonitoringData(name) {
 async function updateData() {
     var data = await getMonitoringData('example');
     // var div = document.getElementById('data');
+    // console.log(data);
     genChart(data);
     // div.innerHTML = JSON.stringify(data);
 }
@@ -63,7 +64,7 @@ function genChart(datax) {
     // console.log(timeArray);
     dataArray = { timeArray, ONArray, OFFArray };
     varData = updateArray(dataArray);
-    genChartCanvas(name, varData);
+    genChartCanvas(name, varData, datax.updated_at);
 }
 
 function updateArray(dataArray) {
@@ -97,9 +98,6 @@ let optionx = {
     plugins: {
         legend: {
             display: false,
-            labels: {
-                color: "rgb(255, 99, 132)",
-            },
         },
     },
     animation: false,
@@ -108,7 +106,9 @@ let optionx = {
             ticks: {
                 display: true,
                 color: "white",
-                callback: function (value, index, values) {
+                padding: 0,
+                margin: -2,
+                callback: function (value) {
                     if (value == 1) {
                         return "U";
                     } else if (value == -1) {
@@ -116,26 +116,21 @@ let optionx = {
                     }
                 },
             },
-            gridLines: {
-                display: false,
-            },
         },
         x: {
             ticks: {
                 display: true,
+                color: "#aaaaaa",
                 autoSkip: true,
-                maxTicksLimit: 5,
-            },
-            gridLines: {
-                drawBorder: false,
+                maxTicksLimit: 6,
             },
         },
     },
 };
 
-function genChartCanvas(chartName, datax) {
+function genChartCanvas(chartName, datax, updated_at) {
     if (initialized == false) {
-        genChartLayout(chartName);
+        genChartLayout(chartName, updated_at);
         var ctx = document.getElementById(`${chartName}_x`).getContext("2d");
         myChart = new Chart(ctx, {
             type: "line",
@@ -146,6 +141,9 @@ function genChartCanvas(chartName, datax) {
         // console.log(datax)
         initialized = true;
     } else {
+        // Get the third element
+        var updatedAt = document.querySelector("#example_chart > div > div:last-child > pre");
+        updatedAt.innerHTML = `updated at ${updated_at}`;
         let ctx = document.getElementById(`${chartName}_x`).getContext("2d");
         myChart.destroy();
         myChart = new Chart(ctx, {
@@ -156,24 +154,32 @@ function genChartCanvas(chartName, datax) {
     }
 }
 
-function genChartLayout(chartName) {
+function genChartLayout(chartName, updated_at) {
     const exampleParent = document.getElementById(`${chartName}_chart`);
     const div = document.createElement('div');
-    div.setAttribute('class', 'block w-full max-h-xs p-2 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700');
+    div.setAttribute('class', 'block w-full p-2 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700');
     div.setAttribute('href', '#');
 
     const innerDiv = document.createElement('div');
     innerDiv.setAttribute('class', 'text-white text-center text-sm');
-    const h2 = document.createElement('h3');
-    h2.textContent = chartName;
-    innerDiv.appendChild(h2);
+    const pre = document.createElement('pre');
+    pre.textContent = chartName + " 10.10.1.100:8899";
+    innerDiv.appendChild(pre);
 
     const canvas = document.createElement('canvas');
     canvas.setAttribute('id', `${chartName}_x`);
     canvas.setAttribute('height', '100px');
     canvas.setAttribute('width', '350px');
 
+    const dateDiv = document.createElement('div');
+    dateDiv.setAttribute('class', 'text-white text-center text-xs');
+    let dates = new Date();
+    const dt = document.createElement('pre');
+    dt.textContent += `updated at ${updated_at}`;
+    dateDiv.appendChild(dt);
+
     div.appendChild(innerDiv);
     div.appendChild(canvas);
+    div.appendChild(dateDiv);
     exampleParent.appendChild(div);
 }
