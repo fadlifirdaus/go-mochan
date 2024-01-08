@@ -93,6 +93,8 @@ function updateArray(dataArray) {
     return data;
 }
 
+
+
 let optionx = {
     plugins: {
         legend: {
