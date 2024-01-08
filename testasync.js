@@ -35,10 +35,10 @@ setTimeout(function () {
     }, 5000);
 }, 0);
 
-function genChart(datax) {
-    let name = datax.name;
+function genChart(data) {
+    let name = data.name;
     let temp = []
-    let arrayData = datax.data;
+    let arrayData = data.data;
     // console.log(arrayData);
     let maxData = arrayData.length;
     // process aray to get OFF value (-1)
@@ -64,7 +64,7 @@ function genChart(datax) {
     // console.log(timeArray);
     dataArray = { timeArray, ONArray, OFFArray };
     varData = updateArray(dataArray);
-    genChartCanvas(name, varData, datax.updated_at);
+    genChartCanvas(name, data.url, varData, data.updated_at);
 }
 
 function updateArray(dataArray) {
@@ -93,44 +93,35 @@ function updateArray(dataArray) {
     return data;
 }
 
-
 let optionx = {
     plugins: {
         legend: {
             display: false,
-        },
+        }
     },
     animation: false,
     scales: {
         y: {
             ticks: {
-                display: true,
-                color: "white",
-                padding: 0,
-                margin: -2,
-                callback: function (value) {
-                    if (value == 1) {
-                        return "U";
-                    } else if (value == -1) {
-                        return "D";
-                    }
-                },
+                display: false,
             },
         },
         x: {
             ticks: {
+                align: 'start',
                 display: true,
                 color: "#aaaaaa",
                 autoSkip: true,
-                maxTicksLimit: 6,
+                maxTicksLimit: 5,
             },
         },
     },
 };
 
-function genChartCanvas(chartName, datax, updated_at) {
+
+function genChartCanvas(chartName, url, datax, updated_at) {
     if (initialized == false) {
-        genChartLayout(chartName, updated_at);
+        genChartLayout(chartName, url, updated_at);
         var ctx = document.getElementById(`${chartName}_x`).getContext("2d");
         myChart = new Chart(ctx, {
             type: "line",
@@ -142,7 +133,7 @@ function genChartCanvas(chartName, datax, updated_at) {
         initialized = true;
     } else {
         // Get the third element
-        var updatedAt = document.querySelector("#example_chart > div > div:last-child > pre");
+        var updatedAt = document.querySelector("#Example_chart > div > div:last-child > pre");
         updatedAt.innerHTML = `updated at ${updated_at}`;
         let ctx = document.getElementById(`${chartName}_x`).getContext("2d");
         myChart.destroy();
@@ -154,16 +145,15 @@ function genChartCanvas(chartName, datax, updated_at) {
     }
 }
 
-function genChartLayout(chartName, updated_at) {
+function genChartLayout(chartName, url, updated_at) {
     const exampleParent = document.getElementById(`${chartName}_chart`);
     const div = document.createElement('div');
     div.setAttribute('class', 'block w-full p-2 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700');
-    div.setAttribute('href', '#');
 
     const innerDiv = document.createElement('div');
     innerDiv.setAttribute('class', 'text-white text-center text-sm');
     const pre = document.createElement('pre');
-    pre.textContent = chartName + " 10.10.1.100:8899";
+    pre.textContent = chartName + " " + url;
     innerDiv.appendChild(pre);
 
     const canvas = document.createElement('canvas');

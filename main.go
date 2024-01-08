@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -18,6 +17,7 @@ type MonitoringData struct {
 
 type Monitoring struct {
 	Name      string           `json:"name"`
+	URL       string           `json:"url"`
 	Data      []MonitoringData `json:"data"`
 	UpdatedAt string           `json:"updated_at"`
 }
@@ -38,8 +38,14 @@ func main() {
 			log.Fatal(err)
 		}
 		defer db.Close()
+		// perhour / 15 detik
+		qry, err := db.Prepare("SELECT * FROM (SELECT * FROM monitoring WHERE name = ? ORDER BY id DESC LIMIT 240) AS t ORDER BY t.id ASC")
+		if err != nil {
+			panic(err.Error())
+		}
+		defer qry.Close()
 
-		rows, err := db.Query(fmt.Sprintf("SELECT * FROM (SELECT * FROM monitoring WHERE service_name = '%s' ORDER BY id DESC LIMIT 50) AS t ORDER BY t.id ASC", name))
+		rows, err := qry.Query(name)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -49,10 +55,11 @@ func main() {
 		var monitoringData MonitoringData
 		for rows.Next() {
 			var id int
-			var serviceName string
+			var name string
+			var url string
 			var status string
 			var createdAt time.Time
-			err := rows.Scan(&id, &serviceName, &status, &createdAt)
+			err := rows.Scan(&id, &name, &url, &status, &createdAt)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -60,8 +67,9 @@ func main() {
 				Status: status,
 				Time:   createdAt.Format("15:04"),
 			}
-			monitorings.Name = serviceName
+			monitorings.Name = name
 			monitorings.Data = append(monitorings.Data, monitoringData)
+			monitorings.URL = url
 			monitorings.UpdatedAt = createdAt.Format("2006-01-02 15:04:05")
 		}
 
